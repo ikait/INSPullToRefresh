@@ -146,6 +146,10 @@ CGFloat const INSPullToRefreshDefaultDragToTriggerOffset = 80;
         _shouldResetContentInsetDuringRotation = YES;
         
         [self resetFrame];
+
+        if (@available(iOS 11.0, *)) {
+            _scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+        }
     }
     
     return self;

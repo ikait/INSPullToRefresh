@@ -96,7 +96,11 @@ static CGFloat const INSInfinityScrollContentInsetAnimationTime = 0.3;
         _preserveContentInset = NO;
         _enabled = YES;
         self.hidden = !self.shouldShowWhenDisabled;
-
+        if (@available(iOS 11.0, *)) {
+            _scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+            _scrollView.contentInset = UIEdgeInsetsMake(0, 0, 0, 0);
+            _scrollView.scrollIndicatorInsets = _scrollView.contentInset;
+        }
         [self resetFrame];
     }
 
@@ -254,7 +258,7 @@ static CGFloat const INSInfinityScrollContentInsetAnimationTime = 0.3;
     
     // Whether should the handler execution be delayed until scroll deceleration or not
     
-    if( _callInfiniteScrollActionImmediatly ) {
+    if( _callInfiniteScrollActionImmediately ) {
         [self callInfiniteScrollActionHandler];
     }
     else {

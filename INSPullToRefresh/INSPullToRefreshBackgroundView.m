@@ -150,6 +150,9 @@ CGFloat const INSPullToRefreshDefaultDragToTriggerOffset = 80;
         if (@available(iOS 11.0, *)) {
             _scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
         }
+        if (@available(iOS 13.0, *)) {
+            _scrollView.automaticallyAdjustsScrollIndicatorInsets = NO;
+        }
     }
     
     return self;
@@ -210,15 +213,14 @@ CGFloat const INSPullToRefreshDefaultDragToTriggerOffset = 80;
     }
 }
 
-- (void)didMoveToSuperview {
-    [super didMoveToSuperview];
-    
+- (void)didMoveToWindow {
+    [super didMoveToWindow];
+
     UIViewController *firstReponderViewController = [self ins_firstResponderViewController];
     firstReponderViewController.automaticallyAdjustsScrollViewInsets = NO;
     
     if (firstReponderViewController.navigationController && firstReponderViewController.navigationController.navigationBar.translucent && (firstReponderViewController.edgesForExtendedLayout & UIRectEdgeTop)) {
-        
-        self.scrollView.contentInset = UIEdgeInsetsMake(firstReponderViewController.navigationController.navigationBar.frame.origin.y + firstReponderViewController.navigationController.navigationBar.bounds.size.height, self.scrollView.contentInset.left, self.scrollView.contentInset.bottom, self.scrollView.contentInset.right);
+        self.scrollView.contentInset = UIEdgeInsetsMake([self statusBarHeight:firstReponderViewController] + firstReponderViewController.navigationController.navigationBar.bounds.size.height, self.scrollView.contentInset.left, self.scrollView.contentInset.bottom, self.scrollView.contentInset.right);
         self.scrollView.scrollIndicatorInsets = self.scrollView.contentInset;
     } 
 }
@@ -250,7 +252,7 @@ CGFloat const INSPullToRefreshDefaultDragToTriggerOffset = 80;
         UIViewController *viewController = [self ins_firstResponderViewController];
         
         BOOL navigationBarHidden = viewController.navigationController.navigationBarHidden;
-        CGFloat navigationBarHeight = viewController.navigationController.navigationBar.frame.origin.y + viewController.navigationController.navigationBar.bounds.size.height;
+        CGFloat navigationBarHeight = [self statusBarHeight:viewController] + viewController.navigationController.navigationBar.bounds.size.height;
         if (navigationBarHidden) {
             navigationBarHeight = 0.f;
         }
@@ -407,6 +409,20 @@ CGFloat const INSPullToRefreshDefaultDragToTriggerOffset = 80;
                                 height);
     }
     
+}
+
+- (CGFloat)statusBarHeight:(UIViewController *)viewController {
+    if (@available(iOS 13.0, *)) {
+        if (viewController.view.window &&
+            viewController.view.window.windowScene &&
+            viewController.view.window.windowScene.statusBarManager) {
+            return viewController.view.window.windowScene.statusBarManager.statusBarFrame.size.height;
+        }
+    }
+    if (viewController.navigationController) {
+        return viewController.navigationController.navigationBar.frame.origin.y;
+    }
+    return 0;
 }
 
 @end
